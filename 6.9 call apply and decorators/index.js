@@ -9,14 +9,13 @@ function sleep(second) {
   while (new Date().getTime() < dest) { }
 }
 
-function cacheDecorator(fun, ctx = {}) {
+function cacheDecorator(fun) {
   const cache = new Map();
   function wrapedFun(x) {
-    console.log(cache);
     if (cache.has(x)) {
       return cache.get(x);
     }
-    const ret = fun.call(ctx, x);
+    const ret = fun.call(this, x);
     cache.set(x, ret);
     return ret;
   }
@@ -24,19 +23,16 @@ function cacheDecorator(fun, ctx = {}) {
 }
 
 const worker = {
-  a: 1,
+  a: 10,
   slow(x) {
     sleep(1);
-    console.log('this.a', this.a)
+    console.log('this.a', this.a);
     return x * this.a;
   },
 };
 
-// const b = worker.slow(2);
-// console.log(b);
+worker.slow = cacheDecorator(worker.slow);
 
-const workerSlow = cacheDecorator(worker.slow, worker);
+worker.slow(2);
 
-workerSlow(2)
 
-debugger;
